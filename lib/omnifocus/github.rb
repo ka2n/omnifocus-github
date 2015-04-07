@@ -21,9 +21,10 @@ module OmniFocus::Github
         :user     => omnifocus_git_param(:user,         nil, account),
         :password => omnifocus_git_param(:password,     nil, account),
         :oauth    => omnifocus_git_param("oauth-token", nil, account),
+        :netrc    => omnifocus_git_param(:netrc,        nil, account),
       }
 
-      unless auth[:user] && (auth[:password] || auth[:oauth])
+      unless auth[:user] && (auth[:password] || auth[:oauth] || auth[:netrc])
         warn "Missing authentication parameters for account #{account}."
         next
       end
@@ -63,6 +64,9 @@ module OmniFocus::Github
       client.user(auth[:name])
     elsif auth[:user] && auth[:oauth]
       client = Octokit::Client.new :access_token => auth[:oauth]
+      client.user.login
+    elsif auth[:user] && auth[:netrc]
+      client = Octokit::Client.new :netrc => true
       client.user.login
     else
       raise ArgumentError, "Missing authentication"
